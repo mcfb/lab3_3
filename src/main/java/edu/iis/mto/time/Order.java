@@ -11,9 +11,11 @@ public class Order {
 	private State orderState;
 	private List<OrderItem> items = new ArrayList<OrderItem>();
 	private DateTime subbmitionDate;
+	private FakeDateTime fakeDateTime;
 
-	public Order() {
+	public Order(FakeDateTime fakeDateTime) {
 		orderState = State.CREATED;
+		this.fakeDateTime = fakeDateTime;
 	}
 
 	public void addItem(OrderItem item) {
@@ -28,13 +30,13 @@ public class Order {
 		requireState(State.CREATED);
 
 		orderState = State.SUBMITTED;
-		subbmitionDate = new DateTime();
+		subbmitionDate = fakeDateTime.getDate();
 
 	}
 
 	public void confirm() {
 		requireState(State.SUBMITTED);
-		int hoursElapsedAfterSubmittion = Hours.hoursBetween(subbmitionDate, new DateTime()).getHours();
+		int hoursElapsedAfterSubmittion = Hours.hoursBetween(subbmitionDate, fakeDateTime.getDate()).getHours();
 		if(hoursElapsedAfterSubmittion > VALID_PERIOD_HOURS){
 			orderState = State.CANCELLED;
 			throw new OrderExpiredException();
