@@ -1,10 +1,12 @@
 package edu.iis.mto.time;
 
-import com.sun.org.apache.xpath.internal.operations.Or;
-import org.hamcrest.Matchers;
-import org.junit.Test;
+import static org.junit.Assert.assertThat;
 
-import static org.junit.Assert.*;
+import org.hamcrest.Matchers;
+import org.joda.time.DateTime;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 public class OrderTest {
 
@@ -12,8 +14,9 @@ public class OrderTest {
     private FakeDateTime fakeDateTime;
     private Order order;
 
-    private void setup(){
-         fakeDateTime = new FakeDateTime();
+    @Before
+    public void setUp(){
+         fakeDateTime = Mockito.mock(FakeDateTime.class);
          order = new Order(fakeDateTime);
     }
 
@@ -21,20 +24,19 @@ public class OrderTest {
 
     @Test(expected = OrderExpiredException.class)
     public void shouldThrowOrderExpiredIfOrderIsExpired() {
-        setup();
-        fakeDateTime.addDateToReturn(2019,04,20,20,00);
-        fakeDateTime.addDateToReturn(2019,04,21,21,00);
+        Mockito.when(fakeDateTime.getDate()).thenReturn(new DateTime(2019,04,20,20,00));
         order.submit();
+        Mockito.when(fakeDateTime.getDate()).thenReturn(new DateTime(2019,04,21,21,00));
         order.confirm();
+
     }
 
 
     @Test
     public void shouldBeSubmittedIfOrderIsNotExpired(){
-        setup();
-        fakeDateTime.addDateToReturn(2019,04,20,20,00);
-        fakeDateTime.addDateToReturn(2019,04,20,23,00);
+        Mockito.when(fakeDateTime.getDate()).thenReturn(new DateTime(2019,04,20,20,00));
         order.submit();
+        Mockito.when(fakeDateTime.getDate()).thenReturn(new DateTime(2019,04,20,23,00));
         order.confirm();
 
         assertThat(order.getOrderState(), Matchers.equalTo(Order.State.SUBMITTED));
